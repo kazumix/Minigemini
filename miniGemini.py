@@ -160,11 +160,30 @@ class MiniGemini:
                 
         except APIError as e:
             error_str = str(e)
-            if '429' in error_str or 'RESOURCE_EXHAUSTED' in error_str or 'quota' in error_str.lower():
+            error_lower = error_str.lower()
+            
+            # クォータ超過のチェック
+            if '429' in error_str or 'RESOURCE_EXHAUSTED' in error_str or 'quota' in error_lower:
                 print("エラー: クォータ超過")
-            elif '401' in error_str or '403' in error_str or 'UNAUTHENTICATED' in error_str or 'PERMISSION_DENIED' in error_str or 'INVALID_ARGUMENT' in error_str or 'invalid api key' in error_str.lower() or 'invalid key' in error_str.lower():
+            # 無効なキーのチェック
+            # APIErrorオブジェクトの属性を確認
+            elif (hasattr(e, 'status_code') and e.status_code in [401, 403]) or \
+                 (hasattr(e, 'code') and str(e.code) in ['UNAUTHENTICATED', 'PERMISSION_DENIED']):
+                print("エラー: 無効なキー")
+            # エラーメッセージにPERMISSION_DENIEDまたはUNAUTHENTICATEDが含まれる場合
+            elif 'PERMISSION_DENIED' in error_str or 'UNAUTHENTICATED' in error_str:
+                print("エラー: 無効なキー")
+            # エラーメッセージに明確に無効なキーを示す文字列が含まれている場合
+            elif ('invalid api key' in error_lower) or \
+                 ('api key not valid' in error_lower) or \
+                 ('invalid key' in error_lower and 'api' in error_lower) or \
+                 ('unauthorized' in error_lower and 'api key' in error_lower) or \
+                 ('permission denied' in error_lower and ('api key' in error_lower or 'key' in error_lower)) or \
+                 ('api key was reported' in error_lower) or \
+                 ('leaked' in error_lower and 'api key' in error_lower):
                 print("エラー: 無効なキー")
             else:
+                # その他のエラーは詳細を表示
                 print(f"エラー: APIエラー: {e}")
             return None
         except Exception as e:
