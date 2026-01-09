@@ -1,6 +1,6 @@
 {
-  "api_key": "AIzaSyDm3FtawLFi_RzH0Hgnf1o8gdrDnBm9cVA",
+  "api_key": "ここにAPIキー",
   "model_name": "gemini-2.5-flash-lite",
   "prompt_rule": "出典を含む50字以内",
-  "last_used": 1767933812.5445437
+  "last_used": 1767935425.473887
 }
