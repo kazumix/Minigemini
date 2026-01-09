@@ -162,26 +162,32 @@ class MiniGemini:
             error_str = str(e)
             error_lower = error_str.lower()
             
-            # クォータ超過のチェック
-            if '429' in error_str or 'RESOURCE_EXHAUSTED' in error_str or 'quota' in error_lower:
+            # ステータスコードを確認
+            status_code = None
+            if hasattr(e, 'status_code'):
+                status_code = e.status_code
+            elif hasattr(e, 'code'):
+                status_code = e.code
+            
+            # 429 TooManyRequests - クォータ超過
+            if status_code == 429 or '429' in error_str or 'RESOURCE_EXHAUSTED' in error_str or 'quota' in error_lower or 'too many requests' in error_lower:
                 print("エラー: クォータ超過")
-            # 無効なキーのチェック
-            # APIErrorオブジェクトの属性を確認
-            elif (hasattr(e, 'status_code') and e.status_code in [401, 403]) or \
-                 (hasattr(e, 'code') and str(e.code) in ['UNAUTHENTICATED', 'PERMISSION_DENIED']):
-                print("エラー: 無効なキー")
-            # エラーメッセージにPERMISSION_DENIEDまたはUNAUTHENTICATEDが含まれる場合
-            elif 'PERMISSION_DENIED' in error_str or 'UNAUTHENTICATED' in error_str:
-                print("エラー: 無効なキー")
-            # エラーメッセージに明確に無効なキーを示す文字列が含まれている場合
-            elif ('invalid api key' in error_lower) or \
+            # 403 Forbidden - 無効なキー
+            elif status_code == 403 or \
+                 (hasattr(e, 'code') and str(e.code) in ['PERMISSION_DENIED', 'UNAUTHENTICATED']) or \
+                 'PERMISSION_DENIED' in error_str or 'UNAUTHENTICATED' in error_str or \
+                 ('invalid api key' in error_lower) or \
                  ('api key not valid' in error_lower) or \
                  ('invalid key' in error_lower and 'api' in error_lower) or \
                  ('unauthorized' in error_lower and 'api key' in error_lower) or \
                  ('permission denied' in error_lower and ('api key' in error_lower or 'key' in error_lower)) or \
                  ('api key was reported' in error_lower) or \
-                 ('leaked' in error_lower and 'api key' in error_lower):
+                 ('leaked' in error_lower and 'api key' in error_lower) or \
+                 'forbidden' in error_lower:
                 print("エラー: 無効なキー")
+            # 400 BadRequest - リクエストエラー
+            elif status_code == 400 or '400' in error_str or 'bad request' in error_lower or 'INVALID_ARGUMENT' in error_str:
+                print("エラー: リクエストエラー")
             else:
                 # その他のエラーは詳細を表示
                 print(f"エラー: APIエラー: {e}")

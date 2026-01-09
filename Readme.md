@@ -6,8 +6,12 @@ MiniGemini is an AI chatbot with search capabilities using the Gemini free tier 
 
 ## Limitations
 
-- **Rate Limit**: The free tier has a limit of 1 request per minute
+- **Daily Limit**: The free tier allows up to 20 requests per day
+- **Rate Limit**: This program implements a 1-minute cooldown between requests (1 request per minute)
 - **Cooldown**: If less than 1 minute has passed since the last request, you will see "Error: Cooldown in progress (X seconds remaining)"
+- **Google API Limits** (reference values as of today):
+  - Up to 5 requests per minute
+  - Up to 250K input tokens per minute
 
 ## Installation
 
