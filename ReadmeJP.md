@@ -47,9 +47,15 @@ pip install -r requirements.txt
 
 5. APIキーが生成されたら、コピーします
 
-### 3. 設定ファイルの作成
+### 3. APIキーの設定
 
-コピーしたAPIキーを`minigemini.json`ファイルに記載します：
+1. 初回起動時に設定ファイルを自動生成します：
+   ```bash
+   python miniGemini.py
+   ```
+   これにより、同じディレクトリに`minigemini.json`が作成されます。
+
+2. `minigemini.json`を開き、`api_key`の値をコピーしたAPIキーに置き換えます：
 
 ```json
 {
@@ -58,6 +64,8 @@ pip install -r requirements.txt
   "prompt_rule": "出典を含む50字以内"
 }
 ```
+
+**注意**: 設定ファイル（`minigemini.json`）は初回起動時にデフォルト値で自動生成されます。`api_key`フィールドを実際のAPIキーに更新するだけで使用できます。
 
 ## 動作モード
 

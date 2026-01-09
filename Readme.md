@@ -47,9 +47,15 @@ Required packages:
 
 5. Once the API key is generated, copy it
 
-### 3. Create Configuration File
+### 3. Configure API Key
 
-Enter the copied API key in the `minigemini.json` file:
+1. Run MiniGemini for the first time to automatically generate the configuration file:
+   ```bash
+   python miniGemini.py
+   ```
+   This will create `minigemini.json` in the same directory.
+
+2. Open `minigemini.json` and replace the `api_key` value with your copied API key:
 
 ```json
 {
@@ -58,6 +64,8 @@ Enter the copied API key in the `minigemini.json` file:
   "prompt_rule": "Include sources within 50 characters"
 }
 ```
+
+**Note**: The configuration file (`minigemini.json`) is automatically generated on first run with default values. You only need to update the `api_key` field with your actual API key.
 
 ## Operation Modes
 

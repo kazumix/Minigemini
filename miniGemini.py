@@ -29,22 +29,38 @@ class MiniGemini:
             script_dir = os.path.dirname(os.path.abspath(__file__))
             config_file = os.path.join(script_dir, config_file)
         
+        # デフォルト値（現在のjsonの値）
+        default_api_key = "AIzaSyAkIKuvYomu9BY53iyObL0SKLy7i1D9gp4"
+        default_model_name = "gemini-2.5-flash-lite"
+        default_prompt_rule = "出典を含む50字以内"
+        
         # minigemini.jsonから設定を読み込み
         if os.path.exists(config_file):
             try:
                 with open(config_file, 'r', encoding='utf-8') as f:
                     config = json.load(f)
-                    self.api_key = api_key or config.get('api_key')
-                    self.model_name = model_name or config.get('model_name', 'gemini-2.5-flash-lite')
-                    self.prompt_rule = config.get('prompt_rule', '')
+                    self.api_key = api_key or config.get('api_key') or default_api_key
+                    self.model_name = model_name or config.get('model_name', default_model_name)
+                    self.prompt_rule = config.get('prompt_rule', default_prompt_rule)
             except Exception as e:
                 raise ValueError(f"設定ファイルの読み込みエラー: {e}")
         else:
-            self.api_key = api_key
-            self.model_name = model_name or 'gemini-2.5-flash-lite'
-            self.prompt_rule = ''
-            if not self.api_key:
-                raise FileNotFoundError(f"設定ファイルが見つかりません: {config_file}")
+            # jsonファイルがない場合は自動生成
+            self.api_key = api_key or default_api_key
+            self.model_name = model_name or default_model_name
+            self.prompt_rule = default_prompt_rule
+            
+            # デフォルト値でJSONファイルを自動生成
+            config = {
+                "api_key": self.api_key,
+                "model_name": self.model_name,
+                "prompt_rule": self.prompt_rule
+            }
+            try:
+                with open(config_file, 'w', encoding='utf-8') as f:
+                    json.dump(config, f, indent=2, ensure_ascii=False)
+            except Exception as e:
+                print(f"警告: 設定ファイルの生成に失敗しました: {e}")
         
         if not self.api_key:
             raise ValueError("APIキーが設定されていません。minigemini.jsonに設定するか、引数で指定してください。")
@@ -146,6 +162,8 @@ class MiniGemini:
             error_str = str(e)
             if '429' in error_str or 'RESOURCE_EXHAUSTED' in error_str or 'quota' in error_str.lower():
                 print("エラー: クォータ超過")
+            elif '401' in error_str or '403' in error_str or 'UNAUTHENTICATED' in error_str or 'PERMISSION_DENIED' in error_str or 'INVALID_ARGUMENT' in error_str or 'invalid api key' in error_str.lower() or 'invalid key' in error_str.lower():
+                print("エラー: 無効なキー")
             else:
                 print(f"エラー: APIエラー: {e}")
             return None
